@@ -1,0 +1,158 @@
+// Le fichier COMP_Calcul.h ---------------------------------------------------------
+#pragma once
+namespace NS_COMP
+{
+	class COMP_Calcul
+	{
+	private:
+		double puht;
+		double tva;
+		double qteArticle;
+	public:
+		COMP_Calcul(double, double, double);
+		double* calculer(void);
+	};
+}
+
+// Le fichier COMP_Imprimante.h -----------------------------------------------------
+#pragma once
+namespace NS_COMP
+{
+	class COMP_Imprimante
+	{
+	public:
+		COMP_Imprimante(void);
+		void imprimer(double*, int);
+	};
+}
+
+// Le fichier SVC_Facture.h ---------------------------------------------------------
+#pragma once
+#include "COMP_Calcul.h"
+#include "COMP_Imprimante.h"
+
+namespace NS_SVC
+{
+	class SVC_Facture
+	{
+	private:
+		NS_COMP::COMP_Calcul* Ocalcul;
+		NS_COMP::COMP_Imprimante* oImprimante;
+	public:
+		SVC_Facture(void);
+		void calculer_et_editer_facture(double, double, double, int);
+	};
+}
+
+// Le fichier COMP_Calcul.cpp -------------------------------------------------------
+#include "COMP_Calcul.h"
+#include <iostream>
+
+using namespace std;
+
+namespace NS_COMP
+{
+	COMP_Calcul::COMP_Calcul(double puht, double tva, double qtArticle)
+	{
+		cout << "Construction du composant Calcul" << endl;
+		this->puht = puht;
+		this->tva = tva;
+		this->qteArticle = qtArticle;
+	}
+	double* COMP_Calcul::calculer(void)
+	{
+		double ptttc;
+		double montantTVA;
+		double ptht;
+		double* data;
+
+		ptht = this->qteArticle * this->puht;
+		montantTVA = (ptht * this->tva) / 100;
+		ptttc = montantTVA + ptht;
+
+		data = new double[3];
+		data[0] = ptht;
+		data[1] = montantTVA;
+		data[2] = ptttc;
+
+		return data;
+	}
+}
+
+// Le fichier COMP_Imprimante.cpp ---------------------------------------------------
+#include "COMP_Imprimante.h"
+#ifndef __IOSTREAM_H
+#include <iostream>
+#endif
+
+using namespace std;
+
+namespace NS_COMP
+{
+	COMP_Imprimante::COMP_Imprimante(void)
+	{
+		cout << "Construction du composant Imprimante" << endl;
+	}
+	void COMP_Imprimante::imprimer(double* data, int qteFacture)
+	{
+		int i;
+
+		for (i = 0;i < qteFacture;i++)
+		{
+			cout << "--------------------------------------------------------------" << "\n";
+			cout << "--------------------------FACTURE-----------------------------" << "\n";
+			cout << "--------------------------------------------------------------" << "\n";
+			cout << "\n";
+			cout << "Montant total ht : " << data[0] << "\n";
+			cout << "Montant total tva : " << data[1] << "\n";
+			cout << "Montant total ttc : " << data[2] << "\n";
+			cout << endl;
+		}
+	}
+}
+
+// Le fichier SVC_Facture.cpp -------------------------------------------------------
+#include "SVC_Facture.h"
+#ifndef __IOSTREAM_H
+#include <iostream>
+#endif
+
+using namespace std;
+
+NS_SVC::SVC_Facture::SVC_Facture(void)
+{
+	cout << "Construction du service Facture" << endl;
+	this->Ocalcul = NULL;
+	this->oImprimante = NULL;
+}
+
+void NS_SVC::SVC_Facture::calculer_et_editer_facture(double puht, double tva, double nbArticle, int qteFacture)
+{
+	double* data;
+
+	this->Ocalcul = new	NS_COMP::COMP_Calcul(puht, tva, nbArticle);
+	this->oImprimante = new	NS_COMP::COMP_Imprimante();
+
+	data = this->Ocalcul->calculer();
+	this->oImprimante->imprimer(data, qteFacture);
+
+	delete data;
+	delete this->Ocalcul;
+	delete this->oImprimante;
+}
+
+// Le fichier démo2.cpp (main)-------------------------------------------------------
+#include <iostream>
+#include "SVC_Facture.h"
+
+using namespace std;
+using namespace NS_SVC;
+
+int main()
+{
+	NS_SVC::SVC_Facture facture;
+
+	facture.calculer_et_editer_facture(100.00, 10.00, 2 , 3);
+	
+	cout << "end" << endl;
+}
